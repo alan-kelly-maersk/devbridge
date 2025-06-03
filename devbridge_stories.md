@@ -89,7 +89,7 @@ This document outlines the stories for the DevBridge project, which serves as a 
 
 ---
 
-#### NBLMNT-348: Frontend Authentication Implementation
+#### NBLMNT-388: Frontend Authentication Implementation
 
 **Description**: Implement OIDC authentication in the frontend.
 
@@ -191,7 +191,7 @@ This document outlines the stories for the DevBridge project, which serves as a 
 - GitHub Actions workflow for building and pushing to Harbor
 - Documentation for running the container
 
-**Dependencies**: NBLMNT-347, NBLMNT-348, NBLMNT-349, NBLMNT-350, NBLMNT-351, NBLMNT-352, NBLMNT-353
+**Dependencies**: NBLMNT-347, NBLMNT-388, NBLMNT-349, NBLMNT-350, NBLMNT-351, NBLMNT-352, NBLMNT-353
 
 ---
 
