@@ -1,0 +1,11 @@
+{
+  "name": "devbridge-schemas",
+  "version": "1.0.0",
+  "description": "AVRO schemas for DevBridge",
+  "scripts": {
+    "validate": "avro-schema-validator message.avsc"
+  },
+  "devDependencies": {
+    "avro-schema-validator": "^0.2.0"
+  }
+}
