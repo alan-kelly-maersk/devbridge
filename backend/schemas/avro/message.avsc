@@ -1,0 +1,211 @@
+{
+  "type": "record",
+  "fields": [
+    {
+      "name": "type",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "namespace",
+      "type": "string"
+    },
+    {
+      "name": "doc",
+      "type": "string"
+    },
+    {
+      "name": "fields",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "fields": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "type",
+              "type": [
+                "string",
+                {
+                  "type": "record",
+                  "fields": [
+                    {
+                      "name": "type",
+                      "type": "string"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "name": "symbols",
+                      "type": [
+                        "null",
+                        {
+                          "type": "array",
+                          "items": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "fields",
+                      "type": [
+                        "null",
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "record",
+                            "fields": [
+                              {
+                                "name": "name",
+                                "type": "string"
+                              },
+                              {
+                                "name": "type",
+                                "type": [
+                                  {
+                                    "type": "record",
+                                    "fields": [
+                                      {
+                                        "name": "type",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "name": "logicalType",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "array",
+                                    "items": [
+                                      "string",
+                                      {
+                                        "type": "record",
+                                        "fields": [
+                                          {
+                                            "name": "type",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "name": "logicalType",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "doc",
+                                "type": "string"
+                              },
+                              {
+                                "name": "default",
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": [
+                    "string",
+                    {
+                      "type": "record",
+                      "fields": [
+                        {
+                          "name": "type",
+                          "type": "string"
+                        },
+                        {
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "name": "fields",
+                          "type": {
+                            "type": "array",
+                            "items": {
+                              "type": "record",
+                              "fields": [
+                                {
+                                  "name": "name",
+                                  "type": "string"
+                                },
+                                {
+                                  "name": "type",
+                                  "type": [
+                                    "string",
+                                    {
+                                      "type": "array",
+                                      "items": "string"
+                                    },
+                                    {
+                                      "type": "record",
+                                      "fields": [
+                                        {
+                                          "name": "type",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "name": "name",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "name": "symbols",
+                                          "type": {
+                                            "type": "array",
+                                            "items": "string"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "doc",
+                                  "type": "string"
+                                },
+                                {
+                                  "name": "default",
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "doc",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "default",
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
