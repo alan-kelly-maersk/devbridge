@@ -32,16 +32,16 @@ When discussing code, always ensure that you provide a clear explanation of the 
 # Key Resources
 
 - **GitHub Owner**: Whenever referring to GitHub always default to the alan-kelly-maersk owner.
-- **DevLib**: To integrate our developer library, read the docs here: https://github.com/Maersk-Global/devex-support/tree/master/docs/public/devlib
-- **Retina**: Our in-house Kafka platform: https://github.com/Maersk-Global/devex-support/tree/master/docs/public/retina
-- **MDP**: The Maersk Developer Platform is our delivery and hosting platform: https://github.com/Maersk-Global/devex-support/tree/master/docs/public/mdp
-- **Coding Guidelines**: We have more guidance on coding here: https://github.com/Maersk-Global/devex-support/tree/master/docs/public/handbook
+- **DevLib**: To integrate our developer library, read `/docs/public/devlib` in `Maersk-Global/devex-support` Github repo
+- **Retina**: Our in-house Kafka platform: Read `/docs/public/retina` in `Maersk-Global/devex-support` Github repo
+- **MDP**: The Maersk Developer Platform is our delivery and hosting platform: Read `/docs/public/mdp` in `Maersk-Global/devex-support` Github repo
+- **Coding Guidelines**: We have more guidance on coding here: read `/docs/public/handbook` in `Maersk-Global/devex-support` Github repo
 
 # Task Workflow Details
 
 ## Project Management
 
-- **Jira Project**: For this project, all Jira issues are stored in epic NBLMNT-342.
+- **Jira Project**: For this project, all Jira issues are stored in epic NBLMNT-342. When assigning issues in Jira use `alan.kelly@maersk.com` as an assignee, not `vanilla`.
 - **Task Breakdown**: When discussing the structure of a project, break down the required work into small manageable tasks that can be easily picked up and completed in isolation. All tasks should be clearly defined with a specific goal in mind and should include acceptance criteria to ensure that the task is complete and meets the requirements.
 - **Never** start working on a Jira issue that has a status of 'done'
 
