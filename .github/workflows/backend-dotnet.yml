@@ -1,0 +1,54 @@
+name: .NET Backend CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - 'NBLMNT-*'
+    paths:
+      - 'backend/dotnet/**'
+      - '.github/workflows/backend-dotnet.yml'
+  pull_request:
+    paths:
+      - 'backend/dotnet/**'
+      - '.github/workflows/backend-dotnet.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+          cache: true
+          cache-dependency-path: backend/dotnet/**/*.csproj
+
+      - name: Restore dependencies
+        working-directory: backend/dotnet
+        run: dotnet restore
+
+      - name: Build
+        working-directory: backend/dotnet
+        run: dotnet build --no-restore
+
+      - name: Test
+        working-directory: backend/dotnet
+        run: dotnet test --no-build --verbosity normal
+
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/master'
+        working-directory: backend/dotnet
+        run: |
+          docker build -t harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8} .
+          docker tag harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8} harbor.maersk.com/devbridge/backend-dotnet:latest
+
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          docker push harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8}
+          docker push harbor.maersk.com/devbridge/backend-dotnet:latest

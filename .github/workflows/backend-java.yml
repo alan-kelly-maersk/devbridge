@@ -1,0 +1,46 @@
+name: Java Backend CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - 'NBLMNT-*'
+    paths:
+      - 'backend/java/**'
+      - '.github/workflows/backend-java.yml'
+  pull_request:
+    paths:
+      - 'backend/java/**'
+      - '.github/workflows/backend-java.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build and test
+        working-directory: backend/java
+        run: ./mvnw clean verify
+
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/master'
+        working-directory: backend/java
+        run: |
+          docker build -t harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8} .
+          docker tag harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8} harbor.maersk.com/devbridge/backend-java:latest
+
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          docker push harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8}
+          docker push harbor.maersk.com/devbridge/backend-java:latest
