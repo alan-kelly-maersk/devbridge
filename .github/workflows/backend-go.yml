@@ -1,0 +1,53 @@
+name: Go Backend CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - 'NBLMNT-*'
+    paths:
+      - 'backend/go/**'
+      - '.github/workflows/backend-go.yml'
+  pull_request:
+    paths:
+      - 'backend/go/**'
+      - '.github/workflows/backend-go.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: backend/go
+        run: go mod download
+
+      - name: Run tests
+        working-directory: backend/go
+        run: go test -v ./...
+
+      - name: Build
+        working-directory: backend/go
+        run: go build -v ./...
+
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/master'
+        working-directory: backend/go
+        run: |
+          docker build -t harbor.maersk.com/devbridge/backend-go:${GITHUB_SHA::8} .
+          docker tag harbor.maersk.com/devbridge/backend-go:${GITHUB_SHA::8} harbor.maersk.com/devbridge/backend-go:latest
+
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          docker push harbor.maersk.com/devbridge/backend-go:${GITHUB_SHA::8}
+          docker push harbor.maersk.com/devbridge/backend-go:latest

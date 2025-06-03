@@ -1,0 +1,58 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - 'NBLMNT-*'
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Build Docker image
+        if: github.ref == 'refs/heads/main'
+        working-directory: frontend
+        run: |
+          docker build -t harbor.maersk.com/devbridge/frontend:${GITHUB_SHA::8} .
+          docker tag harbor.maersk.com/devbridge/frontend:${GITHUB_SHA::8} harbor.maersk.com/devbridge/frontend:latest
+
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          docker push harbor.maersk.com/devbridge/frontend:${GITHUB_SHA::8}
+          docker push harbor.maersk.com/devbridge/frontend:latest
