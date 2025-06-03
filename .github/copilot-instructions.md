@@ -18,8 +18,8 @@ mode: 'agent'
     - Ensure code is clean, concise, well-documented, and follows best practices.
     - Ensure maximum test coverage and modularity.
 5. ✅ Run all relevant tests before completion
-6. ✅ Update Jira with detailed description and mark as "done"
-7. ✅ Create PR in GitHub and link to Jira ticket
+6. ✅ Create PR in GitHub and link to Jira ticket
+6. ✅ When I confirm the PR is good, update Jira with detailed description and mark as "done"
 
 If any of these steps fail do not proceed with the task.
 
@@ -69,7 +69,7 @@ When discussing code, always ensure that you provide a clear explanation of the 
 
 ## Containerization
 
-- **Docker Requirement**: All new services must be accompanied by an appropriate Dockerfile because all services will run on a containerized infrastructure.
+- **Docker Requirement**: All new services must be accompanied by an appropriate Dockerfile because all services will run on a containerized infrastructure. Note: I use podman, not docker.
 - **Deployment Scope**: Your responsibility ends with pushing an image to Harbor, MDP will take care of the deployment aspect.
 
 ## Completing Work
