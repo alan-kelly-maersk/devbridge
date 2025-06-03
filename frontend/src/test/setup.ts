@@ -19,3 +19,9 @@ jest.mock('@opentelemetry/sdk-trace-web', () => ({
     register: jest.fn(),
   })),
 }));
+
+jest.mock('@opentelemetry/resources', () => ({
+  Resource: jest.fn().mockImplementation(() => ({
+    merge: jest.fn(),
+  })),
+}));
