@@ -1,0 +1,362 @@
+openapi: 3.0.3
+info:
+  title: DevBridge API
+  description: |
+    DevBridge API specification that demonstrates best practices in API development.
+    This API is implemented by multiple backend services (Java, Go, .NET) to showcase
+    different implementation approaches while maintaining the same contract.
+  version: 1.0.0
+  contact:
+    name: DevBridge Team
+    email: devbridge@maersk.com
+
+servers:
+  - url: https://{env}.devbridge.maersk.com/api/v1
+    description: DevBridge API server
+    variables:
+      env:
+        enum:
+          - dev
+          - test
+          - prod
+        default: dev
+
+security:
+  - BearerAuth: []
+
+paths:
+  /messages:
+    get:
+      summary: List messages
+      description: Retrieve a list of messages with optional filtering
+      operationId: listMessages
+      parameters:
+        - name: backend
+          in: query
+          description: Filter by backend service type
+          required: false
+          schema:
+            type: string
+            enum: [java, go, dotnet]
+        - name: limit
+          in: query
+          description: Maximum number of messages to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of messages to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  total:
+                    type: integer
+                    description: Total number of messages
+                  limit:
+                    type: integer
+                    description: Maximum number of messages returned
+                  offset:
+                    type: integer
+                    description: Number of messages skipped
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Send a message
+      description: Send a new message to be processed by one of the backend services
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+      responses:
+        '201':
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /files:
+    get:
+      summary: List files
+      description: Retrieve a list of uploaded files
+      operationId: listFiles
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of files to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of files to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/File'
+                  total:
+                    type: integer
+                    description: Total number of files
+                  limit:
+                    type: integer
+                    description: Maximum number of files returned
+                  offset:
+                    type: integer
+                    description: Number of files skipped
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Upload a file
+      description: Upload a new file to be processed
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /files/{fileId}:
+    get:
+      summary: Download a file
+      description: Download a specific file by ID
+      operationId: downloadFile
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /ws:
+    get:
+      summary: WebSocket connection
+      description: |
+        Establish a WebSocket connection for real-time updates.
+        After connection, the client will receive updates when:
+        - A new message is processed
+        - A file processing is completed
+      operationId: websocket
+      responses:
+        '101':
+          description: WebSocket connection established
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Message:
+      type: object
+      required:
+        - id
+        - content
+        - backend
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the message
+        content:
+          type: string
+          description: Message content
+        backend:
+          type: string
+          enum: [java, go, dotnet]
+          description: Backend service that processed the message
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the message was created
+        processedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the message was processed
+
+    MessageInput:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Message content
+          minLength: 1
+          maxLength: 1000
+
+    File:
+      type: object
+      required:
+        - id
+        - name
+        - size
+        - status
+        - uploadedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the file
+        name:
+          type: string
+          description: Original filename
+        size:
+          type: integer
+          description: File size in bytes
+        mimeType:
+          type: string
+          description: MIME type of the file
+        status:
+          type: string
+          enum: [uploaded, processing, completed, failed]
+          description: Current status of the file
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the file was uploaded
+        processedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the file processing was completed
+
+    Error:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type
+        status:
+          type: integer
+          description: The HTTP status code
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of the problem
+
+  responses:
+    BadRequestError:
+      description: The request was invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    UnauthorizedError:
+      description: Authentication is required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ForbiddenError:
+      description: Permission denied
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: The requested resource was not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
