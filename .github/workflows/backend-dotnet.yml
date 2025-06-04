@@ -31,7 +31,7 @@ jobs:
         env:
           GITHUB_PAT: ${{ secrets.EE_CHECKOUT_TOKEN }}
         run: |
-          dotnet nuget add source "https://nuget.pkg.github.com/maersk-global/index.json" --name "Maersk-Global" --username ${{github.actor}} --password "${{secrets.GHCR_PULL_TOKEN}}" --store-password-in-clear-text
+          dotnet nuget add source "https://nuget.pkg.github.com/maersk-global/index.json" --name "Maersk-Global" --username "alan-kelly-maersk" --password "${{secrets.GHCR_PULL_TOKEN}}" --store-password-in-clear-text
 
       - name: Restore dependencies
         working-directory: backend/dotnet
