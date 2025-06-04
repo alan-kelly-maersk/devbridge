@@ -14,7 +14,6 @@ on:
       - '.github/workflows/backend-dotnet.yml'
 
 env:
-  REGISTRY: harbor.maersk.com
   IMAGE_NAME: devbridge/backend-dotnet
 
 jobs:
@@ -56,13 +55,26 @@ jobs:
         working-directory: backend/dotnet
         run: dotnet test --configuration Release --no-build --verbosity normal
 
+      - name: Import Secrets
+        if: github.ref == 'refs/heads/master'
+        uses: hashicorp/vault-action@v2
+        with:
+          url: "https://mss.maersk.io/"
+          method: jwt
+          path: github-jwt
+          role: "devbridge--maersk_global--devbridge"
+          secrets: |
+            devbridge-nonprod-kv/data/platform--harbor/devbridge server | CONTAINER_REGISTRY_SERVER;
+            devbridge-nonprod-kv/data/platform--harbor/devbridge username | CONTAINER_REGISTRY_USERNAME;
+            devbridge-nonprod-kv/data/platform--harbor/devbridge password | CONTAINER_REGISTRY_PASSWORD;
+
       - name: Login to Harbor
         if: github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
+          registry: ${{ env.CONTAINER_REGISTRY_SERVER }}
+          username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
 
       - name: Set up Docker Buildx
         if: github.ref == 'refs/heads/master'
@@ -75,7 +87,7 @@ jobs:
           context: ./backend/dotnet
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
