@@ -13,42 +13,81 @@ on:
       - 'backend/dotnet/**'
       - '.github/workflows/backend-dotnet.yml'
 
+env:
+  IMAGE_NAME: devbridge/backend-dotnet
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '8.0.x'
           cache: true
           cache-dependency-path: backend/dotnet/**/*.csproj
 
+      - name: Configure NuGet Sources
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget remove source github || true
+          dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
+            --name github \
+            --username alan-kelly-maersk \
+            --password ${GITHUB_TOKEN} \
+            --store-password-in-clear-text
+
       - name: Restore dependencies
         working-directory: backend/dotnet
-        run: dotnet restore
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet restore --verbosity detailed
 
       - name: Build
         working-directory: backend/dotnet
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: Test
         working-directory: backend/dotnet
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
-      - name: Build Docker image
+      - name: Import Secrets
         if: github.ref == 'refs/heads/master'
-        working-directory: backend/dotnet
-        run: |
-          docker build -t harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8} .
-          docker tag harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8} harbor.maersk.com/devbridge/backend-dotnet:latest
+        uses: hashicorp/vault-action@v2
+        with:
+          url: "https://mss.maersk.io/"
+          method: jwt
+          path: github-jwt
+          role: "devbridge--maersk_global--devbridge"
+          secrets: |
+            devbridge-nonprod-kv/data/platform--harbor/devbridge server | CONTAINER_REGISTRY_SERVER;
+            devbridge-nonprod-kv/data/platform--harbor/devbridge username | CONTAINER_REGISTRY_USERNAME;
+            devbridge-nonprod-kv/data/platform--harbor/devbridge password | CONTAINER_REGISTRY_PASSWORD;
 
-      - name: Push Docker image
+      - name: Login to Harbor
         if: github.ref == 'refs/heads/master'
-        run: |
-          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
-          docker push harbor.maersk.com/devbridge/backend-dotnet:${GITHUB_SHA::8}
-          docker push harbor.maersk.com/devbridge/backend-dotnet:latest
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY_SERVER }}
+          username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        if: github.ref == 'refs/heads/master'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker image
+        if: github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/dotnet
+          push: true
+          tags: |
+            ${{ env.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.CONTAINER_REGISTRY_SERVER }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

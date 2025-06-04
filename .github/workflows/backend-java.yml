@@ -13,6 +13,12 @@ on:
       - 'backend/java/**'
       - '.github/workflows/backend-java.yml'
 
+env:
+  REGISTRY: harbor.maersk.com
+  IMAGE_NAME: devbridge/backend-java
+  VAULT_ADDR: https://vault.maersk.net
+  VAULT_AUTH_PATH: github-actions
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -31,16 +37,43 @@ jobs:
         working-directory: backend/java
         run: ./mvnw clean verify
 
-      - name: Build Docker image
+      - name: Install Vault CLI
         if: github.ref == 'refs/heads/master'
-        working-directory: backend/java
         run: |
-          docker build -t harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8} .
-          docker tag harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8} harbor.maersk.com/devbridge/backend-java:latest
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install vault
 
-      - name: Push Docker image
+      - name: Get Harbor credentials from Vault
         if: github.ref == 'refs/heads/master'
+        env:
+          VAULT_NAMESPACE: admin/maersk
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login harbor.maersk.com -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
-          docker push harbor.maersk.com/devbridge/backend-java:${GITHUB_SHA::8}
-          docker push harbor.maersk.com/devbridge/backend-java:latest
+          export VAULT_TOKEN=$(vault write -field=token auth/${VAULT_AUTH_PATH}/login bearer=${GITHUB_TOKEN})
+          echo "HARBOR_USERNAME=$(vault read -field=username secret/data/harbor)" >> $GITHUB_ENV
+          echo "HARBOR_PASSWORD=$(vault read -field=password secret/data/harbor)" >> $GITHUB_ENV
+
+      - name: Login to Harbor
+        if: github.ref == 'refs/heads/master'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.HARBOR_USERNAME }}
+          password: ${{ env.HARBOR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        if: github.ref == 'refs/heads/master'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker image
+        if: github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/java
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
