@@ -28,8 +28,6 @@ jobs:
           cache-dependency-path: backend/dotnet/**/*.csproj
 
       - name: Configure NuGet Sources
-        env:
-          GITHUB_PAT: ${{ secrets.EE_CHECKOUT_TOKEN }}
         run: |
           dotnet nuget add source "https://nuget.pkg.github.com/maersk-global/index.json" --name "Maersk-Global" --username "alan-kelly-maersk" --password "${{secrets.GHCR_PULL_TOKEN}}" --store-password-in-clear-text
 
