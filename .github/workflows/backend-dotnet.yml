@@ -13,18 +13,15 @@ on:
       - 'backend/dotnet/**'
       - '.github/workflows/backend-dotnet.yml'
 
-env:
-  IMAGE_NAME: devbridge/backend-dotnet
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
           cache: true
@@ -32,28 +29,28 @@ jobs:
 
       - name: Configure NuGet Sources
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
           dotnet nuget remove source github || true
           dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
             --name github \
             --username alan-kelly-maersk \
-            --password ${GITHUB_TOKEN} \
+            --password ${GITHUB_PAT} \
             --store-password-in-clear-text
 
       - name: Restore dependencies
         working-directory: backend/dotnet
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: dotnet restore --verbosity detailed
 
       - name: Build
         working-directory: backend/dotnet
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --no-restore
 
       - name: Test
         working-directory: backend/dotnet
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal
 
       - name: Import Secrets
         if: github.ref == 'refs/heads/master'
