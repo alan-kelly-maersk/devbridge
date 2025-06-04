@@ -23,26 +23,18 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
           cache: true
           cache-dependency-path: backend/dotnet/**/*.csproj
 
       - name: Configure NuGet Sources
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget remove source github || true
-          dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
-            --name github \
-            --username alan-kelly-maersk \
-            --password ${GITHUB_PAT} \
-            --store-password-in-clear-text
+          dotnet nuget add source "https://nuget.pkg.github.com/maersk-global/index.json" --name "Maersk-Global" --username "alan-kelly-maersk" --password "${{secrets.GHCR_PULL_TOKEN}}" --store-password-in-clear-text
 
       - name: Restore dependencies
         working-directory: backend/dotnet
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: dotnet restore --verbosity detailed
+        run: |
+          dotnet restore --verbosity detailed
 
       - name: Build
         working-directory: backend/dotnet
