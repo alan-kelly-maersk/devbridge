@@ -40,9 +40,9 @@ jobs:
 
       - name: Restore dependencies
         working-directory: backend/dotnet
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: dotnet restore --verbosity detailed
+        run: |
+          sed -i 's/%GITHUB_PAT%/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
+          dotnet restore --verbosity detailed
 
       - name: Build
         working-directory: backend/dotnet
