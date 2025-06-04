@@ -35,11 +35,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Maersk-Global/index.json"
+          dotnet nuget remove source github || true
+          dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
+            --name github \
+            --username alan-kelly-maersk \
+            --password ${GITHUB_TOKEN} \
+            --store-password-in-clear-text
 
       - name: Restore dependencies
         working-directory: backend/dotnet
-        run: dotnet restore
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet restore --verbosity detailed
 
       - name: Build
         working-directory: backend/dotnet
