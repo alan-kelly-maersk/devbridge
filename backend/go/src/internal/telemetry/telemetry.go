@@ -15,9 +15,9 @@ func Init(ctx context.Context, cfg *config.Config) (func(), error) {
 	// - OpenTelemetry setup
 	// - Prometheus metrics
 	// - Structured logging
-	
+
 	log.Printf("Telemetry initialized for service: %s in environment: %s", cfg.ServiceName, cfg.Environment)
-	
+
 	return func() {
 		fmt.Println("Cleaning up telemetry...")
 	}, nil

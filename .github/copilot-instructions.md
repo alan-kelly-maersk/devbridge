@@ -41,7 +41,7 @@ When discussing code, always ensure that you provide a clear explanation of the 
 
 ## Project Management
 
-- **Jira Project**: For this project, all Jira issues are stored in epic NBLMNT-342. When assigning issues in Jira use `alan.kelly@maersk.com` as an assignee, not `vanilla`.
+- **Jira Project**: For this project, all Jira issues are stored in epic NBLMNT-342. When assigning issues in Jira use `Alan Kelly (alan.kelly@maersk.com)` as an assignee, not `vanilla`.
 - **Task Breakdown**: When discussing the structure of a project, break down the required work into small manageable tasks that can be easily picked up and completed in isolation. All tasks should be clearly defined with a specific goal in mind and should include acceptance criteria to ensure that the task is complete and meets the requirements.
 - **Never** start working on a Jira issue that has a status of 'done'
 
@@ -53,6 +53,7 @@ When discussing code, always ensure that you provide a clear explanation of the 
 
 ## Making Code Changes
 
+- **Git Configuration**: If you need a PAT for GitHub to access private nuget packages, I have it configured in the GITHUB_PAT environment variable.
 - **Local Changes**: Make all code changes locally before pushing to GitHub.
 - **Commit Strategy**: Keep changes small and frequent where possible. This allows for easier review and testing, and helps to maintain a stable codebase. Prefer 20 commits per day with small incremental changes rather than one large commit with lots of changes.
 - **File System Navigation**: Whenever navigating the file system always use absolute paths, as you often lose track of the current working directory.
