@@ -29,7 +29,7 @@ jobs:
 
       - name: Configure NuGet Sources
         env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT: ${{ secrets.EE_CHECKOUT_TOKEN }}
         run: |
           dotnet nuget remove source github || true
           dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
@@ -41,7 +41,7 @@ jobs:
       - name: Restore dependencies
         working-directory: backend/dotnet
         run: |
-          sed -i 's/%GITHUB_PAT%/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
+          sed -i 's/%GITHUB_PAT%/${{ secrets.EE_CHECKOUT_TOKEN }}/g' nuget.config
           dotnet restore --verbosity detailed
 
       - name: Build
