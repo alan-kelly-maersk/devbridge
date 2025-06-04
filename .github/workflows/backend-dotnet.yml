@@ -31,17 +31,11 @@ jobs:
         env:
           GITHUB_PAT: ${{ secrets.EE_CHECKOUT_TOKEN }}
         run: |
-          dotnet nuget remove source github || true
-          dotnet nuget add source "https://nuget.pkg.github.com/Maersk-Global/index.json" \
-            --name github \
-            --username alan-kelly-maersk \
-            --password ${GITHUB_PAT} \
-            --store-password-in-clear-text
+          dotnet nuget add source "https://nuget.pkg.github.com/maersk-global/index.json" --name "Maersk-Global" --username ${{github.actor}} --password "${{secrets.GHCR_PULL_TOKEN}}" --store-password-in-clear-text
 
       - name: Restore dependencies
         working-directory: backend/dotnet
         run: |
-          sed -i 's/%GITHUB_PAT%/${{ secrets.EE_CHECKOUT_TOKEN }}/g' nuget.config
           dotnet restore --verbosity detailed
 
       - name: Build
