@@ -24,8 +24,8 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.2.0" />
       <!-- DevLib Packages -->
-    <PackageReference Include="Maersk.DevLib.Configuration" Version="0.0.2" />
-    <PackageReference Include="Maersk.DevLib.PostgreSQL" Version="0.0.1" />
+    <PackageReference Include="Maersk.DevLib.Config" Version="0.0.2" />
+    <PackageReference Include="Maersk.DevLib.PostgreSQLClient" Version="0.0.1" />
     <PackageReference Include="Maersk.DevLib.Retina" Version="0.0.1" />
   </ItemGroup>
 

@@ -61,6 +61,9 @@ When discussing code, always ensure that you provide a clear explanation of the 
 
 ## Coding Standards
 
+- **Dotnet Version**: Use .NET 9 for all new projects.
+- **Java Version**: Use Java 24 for all new projects.
+- **Go Version**: Use Go 1.24 for all new projects.
 - **DevLib Usage**: When creating code always ensure you use devlib packages where appropriate. If you are unsure if a devlib package exists, please ask.
 - **Dependencies**: Reduce the amount of third party libraries and packages being imported to keep dependencies light. Ask before using a third party library.
 - **Code Quality**: Keep the code as clean and concise as possible.
